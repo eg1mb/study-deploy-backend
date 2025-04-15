@@ -17,7 +17,10 @@ spring:
 logging:
   level:
     org.springframework.security: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.web.cors: DEBUG
     com.ssafy.demo: DEBUG
+    org.hibernate: DEBUG
 
 server:
   port: ${SERVER_PORT:8080}

@@ -49,9 +49,10 @@ public class SecurityConfig {
         );
         // 헤더 설정
         http.headers(
-                // h2-console에서 iframe을 사용함. X-Frame-Options을 위해 sameOrigin 설정
                 headersCustomizer -> headersCustomizer
                         .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)
+                        .contentTypeOptions(HeadersConfigurer.ContentTypeOptionsConfig::disable)
+                        .httpStrictTransportSecurity(hsts -> hsts.disable())
         );
         // 인증 설정
         http.authorizeHttpRequests(
@@ -62,19 +63,18 @@ public class SecurityConfig {
                         .requestMatchers(antMatcher("/v3/api-docs/**")).permitAll()
                         .anyRequest().authenticated()
         );
-//---------------------------------------------
+
         http.exceptionHandling(
                 exceptionHandler -> exceptionHandler.accessDeniedHandler(
-					jwtAccessDeniedHandler::handle
+                    jwtAccessDeniedHandler::handle
                 )
         );
 
         http.exceptionHandling(
                 exceptionHandler -> exceptionHandler.authenticationEntryPoint(
-					jwtAuthenticationEntryPoint::commence
+                    jwtAuthenticationEntryPoint::commence
                 )
         );
-//---------------------------------------------
 
         http.sessionManagement(
                 sessionCustomizer -> sessionCustomizer
@@ -91,8 +91,15 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.addAllowedOrigin("http://localhost:5173"); // 로컬 개발 환경
         configuration.addAllowedOrigin("https://study-deploy-frontend.vercel.app"); // Vercel 배포 환경
-        configuration.addAllowedMethod("*");
-        configuration.addAllowedHeader("*");
+        configuration.addAllowedMethod("GET");
+        configuration.addAllowedMethod("POST");
+        configuration.addAllowedMethod("PUT");
+        configuration.addAllowedMethod("DELETE");
+        configuration.addAllowedMethod("OPTIONS");
+        configuration.addAllowedHeader("Content-Type");
+        configuration.addAllowedHeader("Authorization");
+        configuration.addAllowedHeader("X-Requested-With");
+        configuration.addAllowedHeader("Accept");
         configuration.addExposedHeader("Authorization");
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);

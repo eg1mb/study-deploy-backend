@@ -17,6 +17,8 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import static org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher;
 
+import java.util.List;
+
 import com.ssafy.demo.security.jwt.JwtAccessDeniedHandler;
 import com.ssafy.demo.security.jwt.JwtAuthenticationEntryPoint;
 import com.ssafy.demo.security.jwt.JwtAuthenticationFilter;
@@ -53,6 +55,8 @@ public class SecurityConfig {
                         .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)
                         .contentTypeOptions(HeadersConfigurer.ContentTypeOptionsConfig::disable)
                         .httpStrictTransportSecurity(hsts -> hsts.disable())
+                        .xssProtection(xss -> xss.disable())
+                        .cacheControl(cache -> cache.disable())
         );
         // 인증 설정
         http.authorizeHttpRequests(
@@ -85,27 +89,24 @@ public class SecurityConfig {
 
         return http.build();
     }
-
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.addAllowedOrigin("http://localhost:5173"); // 로컬 개발 환경
-        configuration.addAllowedOrigin("https://study-deploy-frontend.vercel.app"); // Vercel 배포 환경
-        configuration.addAllowedMethod("GET");
-        configuration.addAllowedMethod("POST");
-        configuration.addAllowedMethod("PUT");
-        configuration.addAllowedMethod("DELETE");
-        configuration.addAllowedMethod("OPTIONS");
-        configuration.addAllowedHeader("Content-Type");
-        configuration.addAllowedHeader("Authorization");
-        configuration.addAllowedHeader("X-Requested-With");
-        configuration.addAllowedHeader("Accept");
-        configuration.addExposedHeader("Authorization");
+        
+        configuration.setAllowedOrigins(List.of(
+            "http://localhost:5173",
+            "https://study-deploy-frontend.vercel.app"
+        ));
+    
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("Content-Type", "Authorization", "X-Requested-With", "Accept"));
+        configuration.setExposedHeaders(List.of("Authorization"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
-        
+    
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
+    
 }
